@@ -58,7 +58,11 @@ def main():
     es = elasticsearch2.Elasticsearch([args.host])
 
     # Get current list of IDs from ES
-    old_ids = set(get_current_object_ids(es, args.index, args.type))
+    try:
+        old_ids = set(get_current_object_ids(es, args.index, args.type))
+    except elasticsearch2.exceptions.NotFoundError:
+        # index not found, which means there are no old locations to worry about
+        old_ids = set()
 
     # Body for the bulk query
     body = io.StringIO()
