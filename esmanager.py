@@ -110,4 +110,9 @@ def main():
         print("DRY RUN finished")
         print("no data was harmed in the execution of this script :)")
 
+    if old_ids:
+        verb = "were deleted" if not args.dry_run else "would be deleted"
+        print("some locations {}, exiting with non-zero status".format(verb))
+        sys.exit(1)
+
 main()
