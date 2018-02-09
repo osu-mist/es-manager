@@ -51,6 +51,10 @@ def main():
     parser.add_argument("-t", "--type", default=TYPE,
         help="elasticsearch document type")
     args = parser.parse_args()
+
+    if args.dry_run:
+        print("DRY RUN starting")
+
     es = elasticsearch2.Elasticsearch([args.host])
 
     # Get current list of IDs from ES
@@ -94,8 +98,16 @@ def main():
     print("="*80)
 
     # do the bulk query
-    if not args.dry_run:
+    if args.dry_run:
+        print("DRY RUN - not issuing query to elasticsearch")
+    else:
         response = es.bulk(body=body.getvalue(), index=args.index, doc_type=args.type)
         pprint(response)
+
+    print("="*80)
+
+    if args.dry_run:
+        print("DRY RUN finished")
+        print("no data was harmed in the execution of this script :)")
 
 main()
