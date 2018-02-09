@@ -1,14 +1,14 @@
 ES Manager
 ----------
 
-es-manager.py is a script which syncs locations from the [locations-api][]
+esmanager.py is a script which syncs locations from the [locations-api][]
 to an elasticsearch cluster.
 
 [locations-api]: https://github.com/osu-mist/locations-api
 
 ### Example
 
-    python3 es-manager.py -i locations -t locations locations.json
+    python3 esmanager.py -i locations -t locations locations.json
 
 This command reads locations from locations.json and uploads theme to the
 elasticsearch instance at localhost, using index "locations" and document type
