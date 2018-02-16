@@ -2,6 +2,7 @@ import argparse
 import io
 import json
 import logging
+import sys
 
 from pprint import pprint
 
