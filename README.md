@@ -19,4 +19,8 @@ in the json file, those locations will be deleted; the deleted locations will
 be printed to stdout (for posterity), and es-manager will exit with an exit
 code of 1.
 
+If running esmanager would cause the overall size of the database to shrink by
+more than some threshold (currently 100), then esmanager will refuse to
+continue unless the --force flag is given.
+
 The format of locations.json is line-separated json objects.

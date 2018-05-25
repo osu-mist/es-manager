@@ -12,6 +12,10 @@ import elasticsearch2.helpers
 INDEX = "locations"
 TYPE = "locations"
 
+# If the database size would decrease by this number or more,
+# require the --force flag
+SANITY_THRESHOLD = 100
+
 # input format: resource objects in json format, one per line
 
 def get_current_object_ids(es, index, type):
@@ -45,6 +49,8 @@ def main():
         help="locations")
     parser.add_argument("--host", metavar="host[:port]", default='localhost',
         help="elasticsearch server")
+    parser.add_argument("-f", "--force", action="store_true", default=False,
+        help="proceed even if a large number of locations would be deleted")
     parser.add_argument("-n", "--dry-run", action="store_true", default=False,
         help="build bulk query but don't execute it")
     parser.add_argument("-i", "--index", default=INDEX,
@@ -68,9 +74,19 @@ def main():
     # Body for the bulk query
     body = io.StringIO()
 
+    # Remember how many objects were in the database,
+    # so we can do a sanity check later.
+    number_of_old_objects = len(old_ids)
+
     with open(args.filename) as f:
         objects = read_objects(f)
+
+        # Keep track of how many objects we'll be adding to the database
+        number_of_new_objects = 0
+
         for id, line in objects:
+            number_of_new_objects += 1
+
             # Add object to bulk query
             body.write(json.dumps({"index": {"_id": id}}))
             body.write("\n")
@@ -99,6 +115,16 @@ def main():
             logger.warning("document %s to be deleted, but does not exist", id)
         else:
             logger.warning("deleted document: %s", json.dumps(source))
+
+    # Last sanity check:
+    # if the database would become much smaller,
+    # refuse to continue unless --force was given
+    difference = number_of_new_objects - number_of_old_objects
+    if difference <= -SANITY_THRESHOLD:
+        logger.warning("database would shrink by %d objects", -difference)
+        if not args.force:
+            logger.error("refusing to continue without the --force flag")
+            sys.exit(1)
 
     print("="*80)
 
