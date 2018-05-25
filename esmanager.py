@@ -49,7 +49,7 @@ def main():
         help="locations")
     parser.add_argument("--host", metavar="host[:port]", default='localhost',
         help="elasticsearch server")
-    parser.add_argument("-f", "--force", action="store_true", default=False,
+    parser.add_argument("--force", action="store_true", default=False,
         help="proceed even if a large number of locations would be deleted")
     parser.add_argument("-n", "--dry-run", action="store_true", default=False,
         help="build bulk query but don't execute it")
