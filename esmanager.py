@@ -12,8 +12,9 @@ import elasticsearch2.helpers
 INDEX = "locations"
 TYPE = "locations"
 
-# If the database size would decrease by this number or more,
-# require the --force flag
+# If more than this number of locations would be deleted, require the --force flag.
+# Allow this number or less locations to be deleted without the --force flag.
+# Deletions can happen either because a location is gone, or its id has changed.
 SANITY_THRESHOLD = 100
 
 # input format: resource objects in json format, one per line
@@ -71,21 +72,18 @@ def main():
         # index not found, which means there are no old locations to worry about
         old_ids = set()
 
+    old_db_size = len(old_ids)
+
     # Body for the bulk query
     body = io.StringIO()
 
-    # Remember how many objects were in the database,
-    # so we can do a sanity check later.
-    number_of_old_objects = len(old_ids)
-
+    # Add each new object to the bulk query (update or insert)
+    new_db_size = 0
     with open(args.filename) as f:
         objects = read_objects(f)
 
-        # Keep track of how many objects we'll be adding to the database
-        number_of_new_objects = 0
-
         for id, line in objects:
-            number_of_new_objects += 1
+            new_db_size += 1
 
             # Add object to bulk query
             body.write(json.dumps({"index": {"_id": id}}))
@@ -99,8 +97,9 @@ def main():
             else:
                 logger.info("new location: %s", id)
 
-    # We're going to delete any remaining IDs
-    # But first, fetch each deleted document and log it
+    # Add deletions to the bulk query.
+    # Any document with an ID that isn't being added should be deleted.
+    # But first, fetch each deleted document and log it.
     old_ids = sorted(old_ids)
     for id in old_ids:
         # Fetch each to-be-deleted document and log it.
@@ -116,19 +115,30 @@ def main():
         else:
             logger.warning("deleted document: %s", json.dumps(source))
 
+
+    # Show some stats
+    num_to_delete = len(old_ids)
+    num_to_update = old_db_size - num_to_delete
+    num_to_add = new_db_size - num_to_update
+    logger.info("Size of old database: %d", old_db_size)
+    logger.info("Size of new database: %d", new_db_size)
+    logger.info("Adding: %d", num_to_add)
+    logger.info("Deleting: %d", num_to_delete)
+    logger.info("Updating: %d", num_to_update)
+
     # Last sanity check:
-    # if the database would become much smaller,
+    # if we are deleting a large number of locations,
     # refuse to continue unless --force was given
-    difference = number_of_new_objects - number_of_old_objects
-    if difference <= -SANITY_THRESHOLD:
-        logger.warning("database would shrink by %d objects", -difference)
+    if num_to_delete > SANITY_THRESHOLD:
+        logger.warning("deleting %d objects from the database, which is larger than the threshold of %d", num_to_delete, SANITY_THRESHOLD)
         if not args.force:
             logger.error("refusing to continue without the --force flag")
             sys.exit(1)
 
     print("="*80)
 
-    # do the bulk query
+    # Do the bulk query
+    # This step performs all the actual insertions and deletions
     if args.dry_run:
         print("DRY RUN - not issuing query to elasticsearch")
     else:
