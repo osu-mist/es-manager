@@ -44,7 +44,10 @@ def read_objects(f):
         yield j['id'], line.strip()
 
 def main():
+    logging.basicConfig(level=logging.WARN, format="%(message)s")
     logger = logging.getLogger("esmanager")
+    logger.setLevel(logging.INFO)
+
     parser = argparse.ArgumentParser()
     parser.add_argument("filename", metavar="locations.json",
         help="locations")
@@ -95,7 +98,7 @@ def main():
             if id in old_ids:
                 old_ids.remove(id)
             else:
-                logger.info("new location: %s", id)
+                logger.debug("new location: %s", id)
 
     # Add deletions to the bulk query.
     # Any document with an ID that isn't being added should be deleted.
