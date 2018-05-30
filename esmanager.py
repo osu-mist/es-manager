@@ -15,7 +15,7 @@ TYPE = "locations"
 # If more than this number of locations would be deleted, require the --force flag.
 # Allow this number or less locations to be deleted without the --force flag.
 # Deletions can happen either because a location is gone, or its id has changed.
-SANITY_THRESHOLD = 100
+SANITY_THRESHOLD = 5
 
 # input format: resource objects in json format, one per line
 
