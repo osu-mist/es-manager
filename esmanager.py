@@ -49,7 +49,7 @@ def main():
     logger.setLevel(logging.INFO)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("filename", metavar="locations.json",
+    parser.add_argument("filename", metavar="locations.ndjson",
         help="locations")
     parser.add_argument("--host", metavar="host[:port]", default='localhost',
         help="elasticsearch server")
