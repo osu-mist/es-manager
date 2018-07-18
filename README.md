@@ -8,9 +8,9 @@ to an elasticsearch cluster.
 
 ### Example
 
-    python3 esmanager.py -i locations -t locations locations.json
+    python3 esmanager.py -i locations -t locations locations.ndjson
 
-This command reads locations from locations.json and uploads theme to the
+This command reads locations from locations.ndjson and uploads theme to the
 elasticsearch instance at localhost, using index "locations" and document type
 "locations".
 
@@ -25,4 +25,4 @@ This threshold includes locations that have their id changed, since a change of 
 appears to esmanager to be an addition and a deletion.
 The threshold is governed by the  `SANITY_THRESHOLD` variable in `esmanager.py`.
 
-The format of locations.json is line-separated json objects.
+The format of locations.ndjson is line-separated json objects. See [ndjson.org for more info](http://ndjson.org/)
