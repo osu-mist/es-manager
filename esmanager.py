@@ -6,8 +6,8 @@ import sys
 
 from pprint import pprint
 
-import elasticsearch2
-import elasticsearch2.helpers
+import elasticsearch
+import elasticsearch.helpers
 
 INDEX = "locations"
 TYPE = "locations"
@@ -27,7 +27,7 @@ def get_current_object_ids(es, index, type):
     """
 
     ids = []
-    scan = elasticsearch2.helpers.scan(es,
+    scan = elasticsearch.helpers.scan(es,
         index=index,
         doc_type=type,
         _source=False, # don't include bodies
@@ -66,12 +66,12 @@ def main():
     if args.dry_run:
         print("DRY RUN starting")
 
-    es = elasticsearch2.Elasticsearch([args.host])
+    es = elasticsearch.Elasticsearch([args.host])
 
     # Get current list of IDs from ES
     try:
         old_ids = set(get_current_object_ids(es, args.index, args.type))
-    except elasticsearch2.exceptions.NotFoundError:
+    except elasticsearch.exceptions.NotFoundError:
         # index not found, which means there are no old locations to worry about
         old_ids = set()
 
@@ -113,7 +113,7 @@ def main():
         logger.warning("deleting location: %s", id)
         try:
             source = es.get_source(id=id, index=args.index, doc_type=args.type)
-        except elasticsearch2.exceptions.NotFoundError:
+        except elasticsearch.exceptions.NotFoundError:
             logger.warning("document %s to be deleted, but does not exist", id)
         else:
             logger.warning("deleted document: %s", json.dumps(source))
