@@ -8,6 +8,7 @@ to an elasticsearch cluster.
 
 ### Example
 
+    pip3 install --user -r requirements.txt
     python3 esmanager.py -i locations -t locations locations.json
 
 This command reads locations from locations.json and uploads theme to the

@@ -160,7 +160,7 @@ def main():
         print("DRY RUN - not issuing query to elasticsearch")
     else:
         response = es.bulk(
-            body=body.getvalue(), index=args.index, doc_type=args.type
+            body=body.getvalue(), index=args.index, doc_type=args.type, timeout="15s"
         )
         pprint(response)
 
