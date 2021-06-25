@@ -78,7 +78,7 @@ def main():
     if args.dry_run:
         print("DRY RUN starting")
 
-    es = elasticsearch.Elasticsearch([args.host])
+    es = elasticsearch.Elasticsearch([args.host], timeout=15)
 
     # Get current list of IDs from ES
     try:
@@ -160,7 +160,7 @@ def main():
         print("DRY RUN - not issuing query to elasticsearch")
     else:
         response = es.bulk(
-            body=body.getvalue(), index=args.index, doc_type=args.type, timeout="15s"
+            body=body.getvalue(), index=args.index, doc_type=args.type
         )
         pprint(response)
 
